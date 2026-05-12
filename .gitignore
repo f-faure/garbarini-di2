@@ -1,0 +1,16 @@
+# Sistema
+Thumbs.db
+.DS_Store
+desktop.ini
+
+# Editor
+.vscode/
+*.code-workspace
+.vs/
+.claude/
+
+# Archivos de referencia (no necesarios en producción)
+cambios.jpg
+34.png
+codigo-apps-script.gs
+garbarini-system.md
