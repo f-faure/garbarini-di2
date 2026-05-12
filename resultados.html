@@ -1,0 +1,512 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Resultados — Cátedra Garbarini</title>
+<link rel="icon" type="image/png" href="Redes positivo circular.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+
+@font-face { font-family:'Klavika'; src:url('Klavika-Regular.otf') format('opentype'); font-weight:400; font-style:normal; }
+@font-face { font-family:'Klavika'; src:url('Klavika-LightItalic.otf') format('opentype'); font-weight:300; font-style:italic; }
+@font-face { font-family:'Klavika'; src:url('Klavika-Bold.otf') format('opentype'); font-weight:700; font-style:normal; }
+@font-face { font-family:'Klavika'; src:url('Klavika-BoldItalic.otf') format('opentype'); font-weight:700; font-style:italic; }
+
+:root {
+  --violet:       #6F277B;
+  --violet-dark:  #5B3067;
+  --violet-soft:  rgba(111,39,123,.08);
+  --violet-line:  rgba(111,39,123,.20);
+  --teal:         #1FD7C6;
+  --orange:       #F2994A;
+  --paper:        #F4F1EC;
+  --paper-warm:   #ECE7DE;
+  --paper-card:   #FAF8F4;
+  --ink:          #2A1F2D;
+  --text-main:    #6A656B;
+  --text-sec:     #BDBDBD;
+  --danger:       #C0392B;
+  --font:         "Klavika","Helvetica Neue",Arial,sans-serif;
+  --mono:         "JetBrains Mono","IBM Plex Mono",ui-monospace,"Courier New",monospace;
+}
+
+*,*::before,*::after { box-sizing:border-box; margin:0; padding:0; }
+
+body {
+  font-family: var(--font);
+  background: var(--paper);
+  color: var(--ink);
+  min-height: 100vh;
+}
+
+body::before {
+  content:''; position:fixed; top:14px; left:14px;
+  width:18px; height:18px;
+  border-top:1px solid rgba(42,31,45,.35);
+  border-left:1px solid rgba(42,31,45,.35);
+  pointer-events:none; z-index:500;
+}
+body::after {
+  content:''; position:fixed; bottom:14px; right:14px;
+  width:18px; height:18px;
+  border-bottom:1px solid rgba(42,31,45,.35);
+  border-right:1px solid rgba(42,31,45,.35);
+  pointer-events:none; z-index:500;
+}
+
+/* ── HEADER ── */
+.header {
+  background: var(--violet);
+  padding: 18px 40px;
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  border-bottom: 3px solid var(--teal);
+}
+.header img { height: 36px; }
+.header-title {
+  color: var(--paper);
+  font-size: 15px;
+  font-weight: 700;
+  letter-spacing: 0.02em;
+}
+.header-title em {
+  font-style: italic;
+  font-weight: 300;
+  color: var(--teal);
+}
+.header-sub {
+  color: rgba(244,241,236,.55);
+  font-size: 11px;
+  font-weight: 300;
+  font-style: italic;
+  margin-top: 2px;
+}
+.header-right {
+  margin-left: auto;
+  display: flex;
+  align-items: center;
+  gap: 20px;
+}
+.btn-refresh {
+  font-family: var(--font);
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--violet);
+  background: var(--teal);
+  border: none;
+  padding: 8px 16px;
+  cursor: pointer;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+.btn-refresh:hover { background: #19c2b2; }
+.last-updated {
+  font-family: var(--mono);
+  font-size: 10px;
+  color: rgba(244,241,236,.45);
+}
+
+/* ── LAYOUT ── */
+.page { max-width: 1100px; margin: 0 auto; padding: 48px 40px 80px; }
+
+/* ── EYEBROW ── */
+.eyebrow {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 20px;
+}
+.eyebrow-bar { width: 22px; height: 2px; background: var(--violet); flex-shrink: 0; }
+.eyebrow-text {
+  font-size: 11px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.24em;
+  color: var(--violet);
+}
+
+/* ── TÍTULOS ── */
+h2 {
+  font-size: 26px;
+  font-weight: 700;
+  letter-spacing: -0.02em;
+  margin-bottom: 6px;
+}
+h2 em { font-style: italic; font-weight: 300; color: var(--violet); }
+.section-desc {
+  font-size: 13px;
+  color: var(--text-main);
+  margin-bottom: 32px;
+  font-style: italic;
+  font-weight: 300;
+}
+
+/* ── STAT CARDS ── */
+.stats-row {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 0;
+  border: 1px solid var(--violet-line);
+  margin-bottom: 48px;
+}
+.stat-card {
+  padding: 24px 28px;
+  border-right: 1px solid var(--violet-line);
+}
+.stat-card:last-child { border-right: none; }
+.stat-label {
+  font-size: 10px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.22em;
+  color: var(--text-sec);
+  margin-bottom: 8px;
+}
+.stat-value {
+  font-size: 36px;
+  font-weight: 700;
+  color: var(--violet);
+  line-height: 1;
+  font-family: var(--mono);
+}
+.stat-unit {
+  font-size: 14px;
+  font-weight: 400;
+  color: var(--text-main);
+  margin-left: 4px;
+}
+
+/* ── SECTION DIVIDER ── */
+.section { margin-bottom: 56px; }
+.section + .section { border-top: 1px solid var(--violet-line); padding-top: 48px; }
+
+/* ── BARRA DE FAMILIA ── */
+.familia-list { display: flex; flex-direction: column; gap: 0; }
+.familia-row {
+  display: grid;
+  grid-template-columns: 160px 1fr 60px;
+  align-items: center;
+  gap: 16px;
+  padding: 10px 0;
+  border-bottom: 1px solid var(--violet-line);
+}
+.familia-row:first-child { border-top: 1px solid var(--violet-line); }
+.familia-nombre {
+  font-size: 12px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--ink);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.bar-track {
+  height: 8px;
+  background: var(--paper-warm);
+  position: relative;
+}
+.bar-fill {
+  height: 100%;
+  background: var(--violet);
+  transition: width 0.6s ease;
+}
+.bar-fill.high  { background: var(--teal); }
+.bar-fill.mid   { background: var(--violet); }
+.bar-fill.low   { background: var(--orange); }
+.familia-pct {
+  font-family: var(--mono);
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--ink);
+  text-align: right;
+}
+
+/* ── TABLA ESTUDIANTES ── */
+.tabla-wrap { overflow-x: auto; }
+table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 13px;
+}
+thead th {
+  text-align: left;
+  font-size: 10px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.18em;
+  color: var(--text-sec);
+  padding: 10px 14px;
+  border-bottom: 2px solid var(--violet-line);
+  white-space: nowrap;
+}
+tbody td {
+  padding: 11px 14px;
+  border-bottom: 1px solid var(--violet-line);
+  color: var(--ink);
+}
+tbody tr:hover td { background: var(--violet-soft); }
+.td-nombre { font-weight: 700; }
+.td-comision {
+  font-size: 11px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.12em;
+  color: var(--violet);
+}
+.td-pct {
+  font-family: var(--mono);
+  font-weight: 700;
+  font-size: 14px;
+}
+.td-pct.high  { color: #19a89a; }
+.td-pct.mid   { color: var(--violet); }
+.td-pct.low   { color: var(--orange); }
+.td-mini-bar {
+  width: 100px;
+  height: 5px;
+  background: var(--paper-warm);
+}
+.td-mini-fill {
+  height: 100%;
+  background: var(--violet);
+}
+.td-mini-fill.high { background: var(--teal); }
+.td-mini-fill.low  { background: var(--orange); }
+.badge-estado {
+  font-size: 10px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  padding: 3px 8px;
+  background: var(--violet-soft);
+  color: var(--violet);
+}
+.badge-estado.parcial {
+  background: rgba(242,153,74,.12);
+  color: var(--orange);
+}
+
+/* ── LOADING / ERROR ── */
+#loading, #error {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 80px 40px;
+  text-align: center;
+  gap: 16px;
+}
+#loading .dot-row { display: flex; gap: 8px; }
+.dot {
+  width: 8px; height: 8px;
+  background: var(--violet);
+  animation: pulse 1.2s ease-in-out infinite;
+}
+.dot:nth-child(2) { animation-delay: 0.2s; }
+.dot:nth-child(3) { animation-delay: 0.4s; }
+@keyframes pulse {
+  0%,100% { opacity:.2; transform:scale(.8); }
+  50%      { opacity:1;  transform:scale(1.2); }
+}
+#error { color: var(--danger); }
+
+</style>
+</head>
+<body>
+
+<!-- ── HEADER ── -->
+<header class="header">
+  <img src="Redes positivo circular.png" alt="Garbarini">
+  <div>
+    <div class="header-title">Cátedra <em>Garbarini</em> · Resultados</div>
+    <div class="header-sub">Familia de Productos — DI2 · FADU · UBA</div>
+  </div>
+  <div class="header-right">
+    <span class="last-updated" id="last-updated"></span>
+    <button class="btn-refresh" onclick="cargarDatos()">Actualizar ↻</button>
+  </div>
+</header>
+
+<!-- ── CONTENIDO ── -->
+<div class="page">
+
+  <!-- Loading -->
+  <div id="loading">
+    <div class="dot-row"><div class="dot"></div><div class="dot"></div><div class="dot"></div></div>
+    <span style="color:var(--text-main);font-size:13px;font-style:italic">Cargando resultados…</span>
+  </div>
+
+  <!-- Error -->
+  <div id="error" style="display:none">
+    <span>No se pudieron cargar los datos.</span>
+    <button class="btn-refresh" onclick="cargarDatos()" style="margin-top:8px">Reintentar</button>
+  </div>
+
+  <!-- Resultados -->
+  <div id="resultados" style="display:none">
+
+    <!-- Stats globales -->
+    <div class="stats-row" id="stats-row"></div>
+
+    <!-- Familias -->
+    <div class="section">
+      <div class="eyebrow"><div class="eyebrow-bar"></div><span class="eyebrow-text">Por familia</span></div>
+      <h2>Coincidencias <em>por familia</em></h2>
+      <p class="section-desc">Porcentaje de estudiantes que identificaron correctamente los productos de cada familia.</p>
+      <div class="familia-list" id="familia-list"></div>
+    </div>
+
+    <!-- Estudiantes -->
+    <div class="section">
+      <div class="eyebrow"><div class="eyebrow-bar"></div><span class="eyebrow-text">Por estudiante</span></div>
+      <h2>Desempeño <em>individual</em></h2>
+      <p class="section-desc">Porcentaje de aciertos por estudiante sobre el total de productos a clasificar.</p>
+      <div class="tabla-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th>Nombre y apellido</th>
+              <th>Comisión</th>
+              <th>Aciertos</th>
+              <th></th>
+              <th>Estado</th>
+            </tr>
+          </thead>
+          <tbody id="tabla-body"></tbody>
+        </table>
+      </div>
+    </div>
+
+  </div><!-- /resultados -->
+</div>
+
+<script>
+const ENDPOINT = 'https://script.google.com/macros/s/AKfycbzROwQR6KcWpu0h6_upv9aBJHNtj8WxrDwQKsNI2wUB-q-_xThj2C4dD8qcjDuKi3lA/exec';
+
+function pctClass(p) {
+  if (p >= 70) return 'high';
+  if (p >= 40) return 'mid';
+  return 'low';
+}
+
+async function cargarDatos() {
+  document.getElementById('loading').style.display    = 'flex';
+  document.getElementById('error').style.display      = 'none';
+  document.getElementById('resultados').style.display = 'none';
+
+  try {
+    const res  = await fetch(ENDPOINT);
+    const rows = await res.json();
+
+    if (!Array.isArray(rows) || rows.length === 0) {
+      document.getElementById('loading').style.display = 'none';
+      document.getElementById('error').style.display   = 'flex';
+      document.getElementById('error').querySelector('span').textContent = 'Todavía no hay entregas.';
+      return;
+    }
+
+    renderResultados(rows);
+
+    document.getElementById('loading').style.display    = 'none';
+    document.getElementById('resultados').style.display = 'block';
+    document.getElementById('last-updated').textContent =
+      'Actualizado: ' + new Date().toLocaleTimeString('es-AR');
+
+  } catch(err) {
+    document.getElementById('loading').style.display = 'none';
+    document.getElementById('error').style.display   = 'flex';
+  }
+}
+
+function renderResultados(rows) {
+  // ── Acumular aciertos por familia ──
+  const familiaStats = {}; // { nombre: { ok: N, total: N } }
+  let totalOkGlobal = 0, totalPosGlobal = 0;
+
+  rows.forEach(row => {
+    const resp = row.respuestas || {};
+    Object.entries(resp).forEach(([key, val]) => {
+      // key = "P1_ADACARPE" → nombre = "ADACARPE"
+      const nombre = key.replace(/^P\d+_/, '');
+      if (!familiaStats[nombre]) familiaStats[nombre] = { ok: 0, total: 0 };
+      if (val.C2ok === 'OK') { familiaStats[nombre].ok++;  totalOkGlobal++; }
+      familiaStats[nombre].total++;
+      totalPosGlobal++;
+      if (val.C3ok === 'OK') { familiaStats[nombre].ok++;  totalOkGlobal++; }
+      familiaStats[nombre].total++;
+      totalPosGlobal++;
+    });
+  });
+
+  // ── Stats por estudiante ──
+  const estudianteStats = rows.map(row => {
+    const resp = row.respuestas || {};
+    let ok = 0, total = 0;
+    Object.values(resp).forEach(val => {
+      if (val.C2ok === 'OK') ok++;
+      if (val.C3ok === 'OK') ok++;
+      total += 2;
+    });
+    const pct = total > 0 ? Math.round(ok / total * 100) : 0;
+    return { ...row, ok, total, pct };
+  }).sort((a, b) => b.pct - a.pct);
+
+  const completados = rows.filter(r => r.estado === 'Completado').length;
+  const pctGlobal   = totalPosGlobal > 0 ? Math.round(totalOkGlobal / totalPosGlobal * 100) : 0;
+
+  // ── Stats globales ──
+  document.getElementById('stats-row').innerHTML = `
+    <div class="stat-card">
+      <div class="stat-label">Entregas totales</div>
+      <div class="stat-value">${rows.length}<span class="stat-unit">estudiantes</span></div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-label">Entregas completas</div>
+      <div class="stat-value">${completados}<span class="stat-unit">de ${rows.length}</span></div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-label">Acierto global</div>
+      <div class="stat-value">${pctGlobal}<span class="stat-unit">%</span></div>
+    </div>
+  `;
+
+  // ── Familias ordenadas por % desc ──
+  const familiaOrdenada = Object.entries(familiaStats)
+    .map(([nombre, s]) => ({ nombre, pct: Math.round(s.ok / s.total * 100) }))
+    .sort((a, b) => b.pct - a.pct);
+
+  document.getElementById('familia-list').innerHTML = familiaOrdenada.map(f => `
+    <div class="familia-row">
+      <div class="familia-nombre">${f.nombre}</div>
+      <div class="bar-track">
+        <div class="bar-fill ${pctClass(f.pct)}" style="width:${f.pct}%"></div>
+      </div>
+      <div class="familia-pct">${f.pct}%</div>
+    </div>
+  `).join('');
+
+  // ── Tabla estudiantes ──
+  document.getElementById('tabla-body').innerHTML = estudianteStats.map(e => `
+    <tr>
+      <td class="td-nombre">${e.nombre || '—'}</td>
+      <td class="td-comision">${e.comision || '—'}</td>
+      <td class="td-pct ${pctClass(e.pct)}">${e.pct}%</td>
+      <td>
+        <div class="td-mini-bar">
+          <div class="td-mini-fill ${pctClass(e.pct)}" style="width:${e.pct}%"></div>
+        </div>
+      </td>
+      <td><span class="badge-estado ${e.estado !== 'Completado' ? 'parcial' : ''}">${e.estado || '—'}</span></td>
+    </tr>
+  `).join('');
+}
+
+// Cargar al abrir
+cargarDatos();
+</script>
+</body>
+</html>
