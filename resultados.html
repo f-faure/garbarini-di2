@@ -394,11 +394,13 @@ function pctClass(p) {
   return 'low';
 }
 
-// Parsea CSV respetando celdas con comas dentro de comillas
+// Parsea CSV respetando celdas con comas y comillas escapadas ("")
 function parseCSV(text) {
-  const lines = text.trim().split('\n');
+  // Eliminar BOM si existe
+  const clean = text.charCodeAt(0) === 0xFEFF ? text.slice(1) : text;
+  const lines = clean.trim().split('\n');
   const headers = parseCSVRow(lines[0]);
-  return lines.slice(1).map(line => {
+  return lines.slice(1).filter(l => l.trim()).map(line => {
     const vals = parseCSVRow(line);
     const obj = {};
     headers.forEach((h, i) => obj[h.trim()] = (vals[i] || '').trim());
@@ -411,9 +413,17 @@ function parseCSVRow(line) {
   let cur = '', inQ = false;
   for (let i = 0; i < line.length; i++) {
     const c = line[i];
-    if (c === '"') { inQ = !inQ; }
-    else if (c === ',' && !inQ) { result.push(cur); cur = ''; }
-    else { cur += c; }
+    if (c === '"') {
+      if (inQ && line[i + 1] === '"') {
+        cur += '"'; i++; // "" → " dentro de campo entrecomillado
+      } else {
+        inQ = !inQ;
+      }
+    } else if (c === ',' && !inQ) {
+      result.push(cur); cur = '';
+    } else {
+      cur += c;
+    }
   }
   result.push(cur);
   return result;
