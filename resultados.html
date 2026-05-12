@@ -385,12 +385,38 @@ tbody tr:hover td { background: var(--violet-soft); }
 </div>
 
 <script>
-const ENDPOINT = 'https://script.google.com/macros/s/AKfycbzROwQR6KcWpu0h6_upv9aBJHNtj8WxrDwQKsNI2wUB-q-_xThj2C4dD8qcjDuKi3lA/exec';
+// Lee directo del Google Sheet como CSV — sin Apps Script
+const SHEET_CSV = 'https://docs.google.com/spreadsheets/d/187jLF86er37boJRUQUIY4upTohRacCm4o6a40TskBmY/export?format=csv&gid=0';
 
 function pctClass(p) {
   if (p >= 70) return 'high';
   if (p >= 40) return 'mid';
   return 'low';
+}
+
+// Parsea CSV respetando celdas con comas dentro de comillas
+function parseCSV(text) {
+  const lines = text.trim().split('\n');
+  const headers = parseCSVRow(lines[0]);
+  return lines.slice(1).map(line => {
+    const vals = parseCSVRow(line);
+    const obj = {};
+    headers.forEach((h, i) => obj[h.trim()] = (vals[i] || '').trim());
+    return obj;
+  });
+}
+
+function parseCSVRow(line) {
+  const result = [];
+  let cur = '', inQ = false;
+  for (let i = 0; i < line.length; i++) {
+    const c = line[i];
+    if (c === '"') { inQ = !inQ; }
+    else if (c === ',' && !inQ) { result.push(cur); cur = ''; }
+    else { cur += c; }
+  }
+  result.push(cur);
+  return result;
 }
 
 async function cargarDatos() {
@@ -399,10 +425,26 @@ async function cargarDatos() {
   document.getElementById('resultados').style.display = 'none';
 
   try {
-    const res  = await fetch(ENDPOINT);
-    const rows = await res.json();
+    const res  = await fetch(SHEET_CSV);
+    const text = await res.text();
+    const csv  = parseCSV(text);
 
-    if (!Array.isArray(rows) || rows.length === 0) {
+    // Mapear columnas del Sheet a objetos usables
+    const rows = csv
+      .filter(r => r['Nombre y apellido'])
+      .map(r => {
+        let respuestas = {};
+        try { respuestas = JSON.parse(r['Respuestas']); } catch(e) {}
+        return {
+          nombre:    r['Nombre y apellido'],
+          comision:  r['Comisión'] || r['Comision'],
+          respuestas,
+          fecha:     r['Última actualización'] || r['Ultima actualizacion'],
+          estado:    r['Estado'],
+        };
+      });
+
+    if (rows.length === 0) {
       document.getElementById('loading').style.display = 'none';
       document.getElementById('error').style.display   = 'flex';
       document.getElementById('error').querySelector('span').textContent = 'Todavía no hay entregas.';
