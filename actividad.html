@@ -1142,21 +1142,40 @@ function checkPageComplete() {
 }
 
 // ── NAVIGATION ──
+let _saving = false;
 async function navNext() {
+  if (_saving) return;
+  _saving = true;
+
+  const btn = document.getElementById('btn-nav');
+  const label = document.getElementById('btn-nav-label');
+  const originalLabel = label.textContent;
+  btn.disabled = true;
+  label.textContent = 'Guardando…';
+
   const totalPages = Math.ceil(FAMILIAS.length / PAGE_SIZE);
   const isLast     = currentPage === totalPages - 1;
 
-  if (isLast) {
-    if (!confirm('¿Confirmar entrega final? No podrás modificar tus respuestas.')) return;
-    await saveProgress('Completado');
-    activityDone = true;
-    clearInterval(timerInterval);
-    document.getElementById('app').style.display    = 'none';
-    document.getElementById('gracias').style.display = 'flex';
-    lanzarConfeti();
-  } else {
-    await saveProgress(`Página ${currentPage + 1} completa`);
-    renderPage(currentPage + 1);
+  try {
+    if (isLast) {
+      if (!confirm('¿Confirmar entrega final? No podrás modificar tus respuestas.')) {
+        label.textContent = originalLabel;
+        btn.disabled = false;
+        _saving = false;
+        return;
+      }
+      await saveProgress('Completado');
+      activityDone = true;
+      clearInterval(timerInterval);
+      document.getElementById('app').style.display    = 'none';
+      document.getElementById('gracias').style.display = 'flex';
+      lanzarConfeti();
+    } else {
+      await saveProgress(`Página ${currentPage + 1} completa`);
+      renderPage(currentPage + 1);
+    }
+  } finally {
+    _saving = false;
   }
 }
 
