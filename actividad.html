@@ -226,6 +226,31 @@ body::after {
 #timeout h2 em { font-style:italic; font-weight:300; }
 #timeout p { font-size:15px; color:var(--text-main); }
 
+/* ──────────────── CERRADO ──────────────── */
+#cerrado {
+  display:none; position:fixed; inset:0;
+  background:rgba(244,241,236,.97);
+  z-index:460; flex-direction:column;
+  align-items:center; justify-content:center;
+  gap:16px; text-align:center; padding:40px;
+}
+#cerrado .cerrado-icon {
+  width:48px; height:48px;
+  border:2px solid var(--violet-line-2);
+  display:flex; align-items:center; justify-content:center;
+  color:var(--violet); font-size:22px;
+}
+#cerrado h2 {
+  font-size:38px; font-weight:700; letter-spacing:-0.022em; color:var(--ink);
+}
+#cerrado h2 em { font-style:italic; font-weight:300; color:var(--violet); }
+#cerrado p { font-size:15px; color:var(--text-main); max-width:380px; line-height:1.55; }
+#cerrado .cerrado-label {
+  font-family:var(--mono); font-size:10px; text-transform:uppercase;
+  letter-spacing:0.18em; color:var(--text-sec);
+  border-top:1px solid var(--violet-line); padding-top:14px; margin-top:4px;
+}
+
 /* ──────────────── HEADER ──────────────── */
 #app { display:none; flex-direction:column; min-height:100vh; padding-bottom:72px; }
 
@@ -660,6 +685,14 @@ main {
   <p>Tus respuestas fueron guardadas. Podés cerrar esta ventana.</p>
 </div>
 
+<!-- ─── CERRADO ─── -->
+<div id="cerrado">
+  <div class="cerrado-icon">✕</div>
+  <h2>La actividad<br><em>ya cerró</em></h2>
+  <p>El período de entrega finalizó. Si creés que es un error, consultá al docente.</p>
+  <div class="cerrado-label">Cátedra Garbarini · DI2 · FADU · UBA</div>
+</div>
+
 <!-- ─── APP ─── -->
 <div id="app">
   <header>
@@ -774,6 +807,12 @@ const FAMILIAS = [
 
 const PAGE_SIZE = 5;
 const LETTERS   = ['A','B','C','D','E'];
+
+// ── CIERRE ──
+// Para cerrar la actividad manualmente, reemplazá null con una fecha/hora:
+//   const CIERRE = new Date('2026-05-14T12:30:00-03:00');
+// Con null la actividad permanece abierta siempre.
+const CIERRE = null;
 // ── ENDPOINTS ──
 const ENDPOINT  = 'https://script.google.com/macros/s/AKfycbzROwQR6KcWpu0h6_upv9aBJHNtj8WxrDwQKsNI2wUB-q-_xThj2C4dD8qcjDuKi3lA/exec';
 const SHEET_URL = 'https://docs.google.com/spreadsheets/d/187jLF86er37boJRUQUIY4upTohRacCm4o6a40TskBmY/edit';
@@ -800,6 +839,11 @@ const shuffles   = [];
 // ── INIT ──
 window.addEventListener('DOMContentLoaded', () => {
   if (IS_ADMIN) { showAdmin(); return; }
+  // Verificar si la actividad fue cerrada manualmente
+  if (CIERRE && new Date() > CIERRE) {
+    document.getElementById('cerrado').style.display = 'flex';
+    return;
+  }
   document.getElementById('inp-nombre').focus();
   precomputeShuffles();
 });
