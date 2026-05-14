@@ -314,6 +314,30 @@ tbody tr:hover td { background: var(--violet-soft); }
 }
 #error { color: var(--danger); }
 
+@media print {
+  /* Forzar impresión de fondos y colores */
+  * { -webkit-print-color-adjust: exact !important; print-color-adjust: exact !important; }
+
+  /* Ocultar elementos no necesarios en el PDF */
+  .header { position: static; }
+
+  /* Barras de progreso principales */
+  .bar-track { background: var(--paper-warm) !important; }
+  .bar-fill        { background: var(--violet) !important; }
+  .bar-fill.high   { background: var(--teal) !important; }
+  .bar-fill.mid    { background: var(--violet) !important; }
+  .bar-fill.low    { background: var(--orange) !important; }
+
+  /* Mini barras en tabla de estudiantes */
+  .td-mini-bar  { background: var(--paper-warm) !important; }
+  .td-mini-fill      { background: var(--violet) !important; }
+  .td-mini-fill.high { background: var(--teal) !important; }
+  .td-mini-fill.low  { background: var(--orange) !important; }
+
+  /* Eyebrow bar */
+  .eyebrow-bar { background: var(--violet) !important; }
+}
+
 </style>
 </head>
 <body>
