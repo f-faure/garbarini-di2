@@ -1,5 +1,5 @@
 # Proyecto: Familia de Productos — Cátedra Garbarini
-**Última actualización:** mayo 2026 · Estado: productivo ✓ · Hosteado en GitHub Pages
+**Última actualización:** mayo 2026 · Edición 1 completada ✓ · Hosteado en GitHub Pages
 
 Archivos principales: `actividad.html` + `resultados.html` (single-file cada uno, sin build tools, sin framework).
 
@@ -69,6 +69,18 @@ const FIXED_SHUFFLES = [
 - Default: 10 min. El estudiante no puede modificarlo.
 - Últimos 2 min: color `--danger` + animación blink.
 - Al llegar a 0: guarda automáticamente + overlay "Tiempo terminado".
+
+### Cierre manual de la actividad
+- Constante `CIERRE` cerca del inicio del script (junto a `PAGE_SIZE`).
+- `null` = siempre abierta. Fecha/hora = cerrada a partir de ese momento.
+- Sintaxis exacta (el `new Date(` es obligatorio):
+  ```js
+  const CIERRE = new Date('2026-05-14T11:30:00-03:00');
+  ```
+- Al detectar que `new Date() > CIERRE`: oculta el modal, muestra overlay `#cerrado`.
+- El overlay `#cerrado` muestra "La actividad ya cerró" con estilo del sistema.
+- **Error frecuente al editar en GitHub:** borrar accidentalmente `new Date(` y `)` → queda un string y la comparación nunca se cumple. Siempre verificar que la línea empiece con `new Date(`.
+- El panel `?admin` **no** se ve afectado por CIERRE (sigue accesible siempre).
 
 ### Pantalla de cierre
 - Al guardar la entrega final: oculta `#app`, muestra `#gracias`.
@@ -205,6 +217,14 @@ El campo "Respuestas" contiene JSON con comillas escapadas (`""`). El parser cus
 
 ---
 
+## Página de resultados — notas adicionales
+
+- **Impresión / PDF:** `@media print` con `print-color-adjust: exact` fuerza el renderizado de los fondos de las barras. Sin esto Chrome omite los colores al guardar como PDF.
+- En Chrome al imprimir: activar la casilla **"Gráficos de fondo"** (*Background graphics*) en Más opciones.
+- **Snapshot de resultados:** antes de una nueva edición, guardar PDF con `Ctrl+P → Guardar como PDF` desde `resultados.html`. No requiere código adicional.
+
+---
+
 ## Bugs corregidos (historial completo)
 
 | Bug | Causa | Solución |
@@ -219,6 +239,8 @@ El campo "Respuestas" contiene JSON con comillas escapadas (`""`). El parser cus
 | Apps Script no escribía en Sheet | `createTextResponse` no existe + `getActiveSpreadsheet()` falla en standalone | Usar `createTextOutput` + `openById(SHEET_ID)` |
 | CSV de resultados no cargaba | URL `/export` bloqueada por CORS | Usar URL `/pub` del Sheet publicado en la web |
 | JSON no parseaba en resultados | CSV escapaba `"` como `""` pero parser no hacía unescape | Parser custom con manejo de `""` dentro de campos |
+| Cierre manual no funcionaba | Al editar en GitHub se perdió `new Date(...)`, quedó un string | Siempre escribir `new Date('...')`, no solo la fecha entre paréntesis |
+| Barras de progreso no aparecen en PDF | Navegador omite fondos al imprimir por defecto | `@media print { print-color-adjust: exact }` en `resultados.html` |
 
 ---
 
@@ -230,6 +252,63 @@ El campo "Respuestas" contiene JSON con comillas escapadas (`""`). El parser cus
 4. Si el total de familias cambia de 15, revisar `FIXED_SHUFFLES` y agregar página
 5. Correr ImageMagick trim sobre las imágenes nuevas
 6. `git add . && git commit -m "..." && git push`
+
+---
+
+## Reutilizar la actividad con nuevo material gráfico
+
+Esta sección es la guía completa para repetir la actividad en una edición futura (nueva cursada, nuevos grupos, nuevas imágenes) sin perder la base técnica ni el diseño.
+
+### Antes de empezar la nueva edición
+
+1. **Guardar el snapshot de resultados** de la edición anterior: abrir `resultados.html`, `Ctrl+P → Guardar como PDF`. Nombrar con fecha y comisión.
+2. **Archivar el Google Sheet actual:** duplicar la hoja "Respuestas" y renombrarla con la fecha (ej. `Respuestas 2026-05`). Así los datos históricos quedan intactos cuando se carguen los nuevos.
+3. **Limpiar el Sheet para la nueva edición:** borrar las filas de datos de la hoja "Respuestas" activa (dejar los encabezados).
+
+### Reemplazar el material gráfico
+
+4. **Crear una carpeta por grupo** dentro del repositorio. Nombre = nombre del grupo, sin punto al final (Windows lo elimina).
+5. **Agregar 3 imágenes por grupo:**
+   - `imgs[0]` → producto de referencia (Col 1, se muestra con el badge de letra)
+   - `imgs[1]` → producto Col 2
+   - `imgs[2]` → producto Col 3
+6. **Recortar bordes transparentes** con ImageMagick:
+   ```
+   "C:\Program Files\ImageMagick-7.1.2-Q16-HDRI\magick.exe" mogrify -trim +repage "NombreGrupo\*.png"
+   ```
+7. **Actualizar el array `FAMILIAS`** en `actividad.html` con los nuevos nombres y rutas. El orden del array determina el orden de las páginas.
+
+### Ajustar la lógica de páginas
+
+8. **Si el número de familias cambia**, calcular la nueva cantidad de páginas: `páginas = ceil(familias / 5)`.
+9. **Actualizar `FIXED_SHUFFLES`** — necesita exactamente un objeto `{ c2:[...], c3:[...] }` por página. Cada array tiene `PAGE_SIZE` índices (0 a 4), que deben ser una permutación sin que coincida el índice de posición (derangement):
+   - Regla simple: para col2 rotar por 1 (`[1,2,3,4,0]`), para col3 rotar por 2 (`[2,3,4,0,1]`) o por 3. Verificar que ninguna fila quede con el mismo índice en las 3 columnas.
+   - Agregar o quitar objetos del array según la cantidad de páginas.
+
+### Actualizar el cierre y el timer
+
+10. **Resetear CIERRE a `null`** al inicio de la nueva edición para que la actividad esté abierta:
+    ```js
+    const CIERRE = null;
+    ```
+11. El timer por defecto es 10 min. Cambiar vía URL si se necesita otro tiempo: `?tiempo=15`.
+
+### Deploy
+
+12. `git add . && git commit -m "Nueva edición: [nombre cursada]" && git push`
+13. En ~2 minutos GitHub Pages publica los cambios.
+
+### Checklist rápido de verificación antes de la clase
+
+- [ ] `CIERRE = null` (actividad abierta)
+- [ ] Sheet "Respuestas" limpio (sin datos de edición anterior)
+- [ ] Todas las imágenes cargan (abrir en el navegador y revisar visualmente)
+- [ ] Orden de familias no alinea productos de la misma familia en las 3 columnas
+- [ ] Timer funciona con el tiempo elegido (`?tiempo=N`)
+- [ ] Modal pide nombre y comisión correctamente
+- [ ] Botón "Continuar" se habilita solo al completar la página
+- [ ] Al finalizar aparece confeti + pantalla de agradecimiento
+- [ ] Resultados se ven en `resultados.html`
 
 ---
 
